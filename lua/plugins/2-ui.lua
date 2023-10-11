@@ -126,36 +126,39 @@ return {
         [[ \ \___/  \ \_\ \_\ \_\ \_\]],
         [[  \/__/    \/_/\/_/\/_/\/_/]],
        }
-      else dashboard.section.header.val = {
-[[888b      88                                                           88]],
-[[8888b     88                                                           88]],
-[[88 `8b    88                                                           88]],
-[[88  `8b   88   ,adPPYba,   8b,dPPYba,  88,dPYba,,adPYba,   ,adPPYYba,  88]],
-[[88   `8b  88  a8"     "8a  88P'   "Y8  88P'   "88"    "8a  ""     `Y8  88]],
-[[88    `8b 88  8b       d8  88          88      88      88  ,adPPPPP88  88]],
-[[88     `8888  "8a,   ,a8"  88          88      88      88  88,    ,88  88]],
-[[88      `888   `"YbbdP"'   88          88      88      88  `"8bbdP"Y8  88]],
-                 [[                                    __                ]],
-                 [[                      ___   __  __ /\_\    ___ ___    ]],
-                 [[                    /' _ `\/\ \/\ \\/\ \ /' __` __`\  ]],
-                 [[                    /\ \/\ \ \ \_/ |\ \ \/\ \/\ \/\ \ ]],
-                 [[                    \ \_\ \_\ \___/  \ \_\ \_\ \_\ \_\]],
-                 [[                     \/_/\/_/\/__/    \/_/\/_/\/_/\/_/]],
-      }
+--       else dashboard.section.header.val = {
+-- [[888b      88                                                           88]],
+-- [[8888b     88                                                           88]],
+-- [[88 `8b    88                                                           88]],
+-- [[88  `8b   88   ,adPPYba,   8b,dPPYba,  88,dPYba,,adPYba,   ,adPPYYba,  88]],
+-- [[88   `8b  88  a8"     "8a  88P'   "Y8  88P'   "88"    "8a  ""     `Y8  88]],
+-- [[88    `8b 88  8b       d8  88          88      88      88  ,adPPPPP88  88]],
+-- [[88     `8888  "8a,   ,a8"  88          88      88      88  88,    ,88  88]],
+-- [[88      `888   `"YbbdP"'   88          88      88      88  `"8bbdP"Y8  88]],
+--                  [[                                    __                ]],
+--                  [[                      ___   __  __ /\_\    ___ ___    ]],
+--                  [[                    /' _ `\/\ \/\ \\/\ \ /' __` __`\  ]],
+--                  [[                    /\ \/\ \ \ \_/ |\ \ \/\ \/\ \/\ \ ]],
+--                  [[                    \ \_\ \_\ \___/  \ \_\ \_\ \_\ \_\]],
+--                  [[                     \/_/\/_/\/__/    \/_/\/_/\/_/\/_/]],
+--       }
       end
 
       dashboard.section.header.opts.hl = "DashboardHeader"
       vim.cmd "highlight DashboardHeader guifg=#F7778F"
 
+      -- Why should I use ranger in the first place ... so dumb
       -- If on windows, don't show the 'ranger' button
-      local ranger_button = dashboard.button("r", "🐍 Ranger  ", "<cmd>RnvimrToggle<CR>")
-      if windows then ranger_button = nil end
+      -- local ranger_button = dashboard.button("r", "🐍 Ranger  ", "<cmd>RnvimrToggle<CR>")
+      -- if windows then ranger_button = nil end
+
+      local find_button = dashboard.button("f", "🗄 Find File ", "<cmd>Telescope find_files<CR>")
 
       -- Buttons
       dashboard.section.buttons.val = {
         dashboard.button("n", "📄 New     ", "<cmd>ene<CR>"),
         dashboard.button("e", "🌺 Recent  ", "<cmd>Telescope oldfiles<CR>"),
-        ranger_button,
+        find_button,
         dashboard.button(
           "s",
           "🔎 Sessions",

@@ -1304,6 +1304,13 @@ if true then
     ":w<CR>",
     desc = "Save current buffer"
   }
+
+  maps.n['<leader>fe'] = {
+    function()
+      vim.cmd("Telescope find_files")
+    end,
+    desc = "Find files (jezzi)"
+  }
 end
 
 utils.set_mappings(maps)
