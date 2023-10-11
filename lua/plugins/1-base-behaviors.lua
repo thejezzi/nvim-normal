@@ -173,7 +173,8 @@ return {
       },
       size = 10,
       open_mapping = [[<F7>]],
-      shading_factor = 2,
+      shade_terminals = false,
+      shading_factor = -40,
       direction = "float",
       float_opts = {
         border = "rounded",

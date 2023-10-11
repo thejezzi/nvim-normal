@@ -33,10 +33,14 @@ return {
     event = "User LoadColorSchemes",
     opts = {
       dim_inactive = false,
+      terminal_colors = true,
       styles = {
         comments = { italic = true },
         keywords = { italic = true },
       },
+      on_colors = function(colors)
+        colors.fg_dark = "#ffffff"
+      end,
     }
   },
 
@@ -49,6 +53,13 @@ return {
       palette = "astrodark",
       plugins = { ["dashboard-nvim"] = true },
     },
+  },
+
+  -- nightfox [theme]
+  -- https://github.com/EdenEast/nightfox.nvim
+  {
+    "EdenEast/nightfox.nvim",
+    event = "User LoadColorSchemes",
   },
 
   --  alpha-nvim [greeter]
