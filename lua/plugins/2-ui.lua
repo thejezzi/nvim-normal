@@ -62,6 +62,58 @@ return {
     event = "User LoadColorSchemes",
   },
 
+  {
+    "catppuccin/nvim",
+    event = "User LoadColorSchemes",
+    name = "catppuccin",
+    priority = 1000,
+    opts = {
+      no_underline = false,
+    }
+  },
+
+  {
+    'martinsione/darkplus.nvim',
+    event = "User LoadColorSchemes"
+  },
+
+  {
+    'Mofiqul/vscode.nvim',
+    event = "User LoadColorSchemes"
+  },
+
+  {
+    "tiagovla/tokyodark.nvim",
+    event = "User LoadColorSchemes",
+    opts = {
+      on_colors = function(colors)
+        colors.fg_dark = "#ffffff"
+      end,
+    }
+  },
+
+  {
+    'marko-cerovac/material.nvim',
+    event = "User LoadColorSchemes"
+  },
+
+  {
+    'tomasiser/vim-code-dark',
+    event = "User LoadColorSchemes"
+  },
+
+  -- 'mhartington/oceanic-next'
+  {
+    'mhartington/oceanic-next',
+    event = "User LoadColorSchemes"
+  },
+
+  -- https://neovimcraft.com/plugin/projekt0n/github-nvim-theme
+  {
+    'projekt0n/github-nvim-theme',
+    event = "User LoadColorSchemes"
+  },
+
   --  alpha-nvim [greeter]
   --  https://github.com/goolord/alpha-nvim
   {
