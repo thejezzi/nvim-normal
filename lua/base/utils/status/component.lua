@@ -61,6 +61,14 @@ function M.file_info(opts)
       condition = condition.has_filetype,
     },
     hl = hl.get_attributes "file_info",
+    on_click = {
+      name = "changefiletype",
+      callback = function()
+        if is_available "telescope.nvim" then
+          vim.cmd [[FLOSetFileType]]
+        end
+      end
+    }
   }, opts)
   return M.builder(status_utils.setup_providers(opts, {
     "file_icon",
@@ -173,8 +181,8 @@ function M.cmd_info(opts)
       color = "cmd_info_bg",
       condition = function()
         return condition.is_hlsearch()
-          or condition.is_macro_recording()
-          or condition.is_statusline_showcmd()
+            or condition.is_macro_recording()
+            or condition.is_statusline_showcmd()
       end,
     },
     condition = function() return vim.opt.cmdheight:get() == 0 end,
@@ -443,7 +451,7 @@ function M.lsp(opts)
               status_utils.build_provider(p_opts, provider[p](p_opts)),
               status_utils.build_provider(p_opts, provider.str(p_opts)),
             }
-          or false
+            or false
       end
     )
   )
@@ -508,9 +516,9 @@ function M.signcolumn(opts)
       callback = function(...)
         local args = status_utils.statuscolumn_clickargs(...)
         if
-          args.sign
-          and args.sign.name
-          and env.sign_handlers[args.sign.name]
+            args.sign
+            and args.sign.name
+            and env.sign_handlers[args.sign.name]
         then
           env.sign_handlers[args.sign.name](args)
         end
@@ -538,10 +546,10 @@ function M.builder(opts)
   end
   for key, entry in pairs(opts) do
     if
-      type(key) == "number"
-      and type(entry) == "table"
-      and provider[entry.provider]
-      and (entry.opts == nil or type(entry.opts) == "table")
+        type(key) == "number"
+        and type(entry) == "table"
+        and provider[entry.provider]
+        and (entry.opts == nil or type(entry.opts) == "table")
     then
       entry.provider = provider[entry.provider](entry.opts)
     end
@@ -562,7 +570,7 @@ function M.builder(opts)
         children,
         opts.surround.condition
       )
-    or children
+      or children
 end
 
 --- Display an spinner while the compiler is compiling.
