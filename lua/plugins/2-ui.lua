@@ -395,7 +395,19 @@ return {
           hl = { fg = "fg", bg = "bg" },
           status.component.mode(),
           status.component.git_branch(),
-          status.component.file_info { filetype = {}, filename = false, file_modified = false, },
+          status.component.file_info {
+            filetype = {},
+            filename = false,
+            file_modified = false,
+            on_click = {
+              name = "changefiletype",
+              callback = function()
+                if require("base.utils").is_available "telescope.nvim" then
+                  vim.cmd [[FLOSetFileType]]
+                end
+              end
+            }
+          },
           status.component.git_diff(),
           status.component.diagnostics(),
           status.component.fill(),

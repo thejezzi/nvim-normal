@@ -61,14 +61,6 @@ function M.file_info(opts)
       condition = condition.has_filetype,
     },
     hl = hl.get_attributes "file_info",
-    on_click = {
-      name = "changefiletype",
-      callback = function()
-        if is_available "telescope.nvim" then
-          vim.cmd [[FLOSetFileType]]
-        end
-      end
-    }
   }, opts)
   return M.builder(status_utils.setup_providers(opts, {
     "file_icon",
