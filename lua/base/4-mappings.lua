@@ -377,6 +377,10 @@ maps.n["<leader>bsm"] = {
   function() require("base.utils.buffer").sort "modified" end,
   desc = "Sort by modification (buffers)",
 }
+maps.n["<leader>bw"] = {
+  function() vim.cmd(":bd") end,
+  desc = "Close the current buffer"
+}
 maps.n["<leader>b\\"] = {
   function()
     require("base.utils.status").heirline.buffer_picker(function(bufnr)
@@ -1292,6 +1296,9 @@ end
 -- vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
 -- vim.api.nvim_set_keymap("i", "<C-H>", 'copilot#Previous()', { silent = true, expr = true })
 -- vim.api.nvim_set_keymap("i", "<C-K>", 'copilot#Next()', { silent = true, expr = true })
+
+if is_available "copilot" then
+end
 
 -- hop.nivm ----------------------------------------------------------------
 if is_available "hop.nvim" then
