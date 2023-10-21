@@ -14,7 +14,7 @@
 --      -> notify                → Send a notification asynchronously.
 --      -> event                 → Manually emit a system event.
 --      -> system_open           → Open the file or URL under the cursor.
---      -> toggle_term_cmd       → get/set a re-usable toggleterm session.
+--      -> toggle_term_cmd       → get/set a reusable toggleterm session.
 --      -> alpha_button          → Nice way to create a button for alpha.
 --      -> is_available          → Return true if the plugin is available.
 --      -> plugin_opts           → Return a plugin opts table.
@@ -170,8 +170,10 @@ end
 ---@param type number|nil The type of the notification (:help vim.log.levels).
 ---@param opts? table The nvim-notify options to use (:help notify-options).
 function M.notify(msg, type, opts)
-  vim.schedule(function() vim.notify(
-    msg, type, M.extend_tbl({ title = "Neovim" }, opts)) end)
+  vim.schedule(function()
+    vim.notify(
+      msg, type, M.extend_tbl({ title = "Neovim" }, opts))
+  end)
 end
 
 --- Trigger an internal NormalNvim event.
@@ -198,8 +200,8 @@ function M.system_open(path)
   elseif vim.fn.has "unix" == 1 and vim.fn.executable "xdg-open" == 1 then
     cmd = { "xdg-open" }
   elseif
-    (vim.fn.has "mac" == 1 or vim.fn.has "unix" == 1)
-    and vim.fn.executable "open" == 1
+      (vim.fn.has "mac" == 1 or vim.fn.has "unix" == 1)
+      and vim.fn.executable "open" == 1
   then
     cmd = { "open" }
   end
@@ -372,7 +374,7 @@ end
 
 --- regex used for matching a valid URL/URI string
 M.url_matcher =
-  "\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*})\\})+"
+"\\v\\c%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)%([&:#*@~%_\\-=?!+;/0-9a-z]+%(%([.;/?]|[.][.]+)[&:#*@~%_\\-=?!+/0-9a-z]+|:\\d+|,%(%(%(h?ttps?|ftp|file|ssh|git)://|[a-z]+[@][a-z]+[.][a-z]+:)@![0-9a-z]+))*|\\([&:#*@~%_\\-=?!+;/.0-9a-z]*\\)|\\[[&:#*@~%_\\-=?!+;/.0-9a-z]*\\]|\\{%([&:#*@~%_\\-=?!+;/.0-9a-z]*|\\{[&:#*@~%_\\-=?!+;/.0-9a-z]*})\\})+"
 
 --- Delete the syntax matching rules for URLs/URIs if set.
 function M.delete_url_effect()
@@ -415,6 +417,19 @@ function M.confirm_quit()
   end
 end
 
-
+--- Print a table recursively, useful for debugging
+---@param t any The node which is either the root table or the next node to print or iterate through
+---@param indent string The identing to prettyprint the table values in order
+function M.print_table(t, indent)
+  indent = indent or ""
+  for k, v in pairs(t) do
+    if type(v) == "table" then
+      print(indent .. k .. ":")
+      printTable(v, indent .. "  ")
+    else
+      print(indent .. k .. ": " .. tostring(v))
+    end
+  end
+end
 
 return M
