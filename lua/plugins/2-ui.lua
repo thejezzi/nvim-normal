@@ -145,7 +145,13 @@ return {
     event = "User LoadColorSchemes",
     name = "nightfly",
     lazy = false,
-    priority = 1000
+    priority = 1000,
+    config = function()
+      vim.g.nightflyTerminalColors = false
+      vim.g.nightflyTransparent = true
+      vim.g.nightflyVirtualTextColor = true
+      vim.g.nightflyWinSeparator = 1
+    end
   },
 
   {
@@ -157,6 +163,24 @@ return {
       print("Hi there")
       vim.g.one_nvim_transparent_bg = true
     end
+  },
+
+  {
+    'maxmx03/dracula.nvim',
+    event = "User LoadColorSchemes",
+    name = "dracula",
+    opts = {
+      colors = {
+        bg = '#1a1a1a',
+        bgDark = '1a1a1a'
+      }
+    }
+  },
+
+
+  {
+    "rebelot/kanagawa.nvim",
+    event = "User LoadColorSchemes",
   },
 
   --  alpha-nvim [greeter]
@@ -217,14 +241,14 @@ return {
       --   '  ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝ ',
       --   '                                                     ',
       -- }
-      -- dashboard.section.header.val = {
-      --   [[                __                ]],
-      --   [[  ___   __  __ /\_\    ___ ___    ]],
-      --   [[/' _ `\/\ \/\ \\/\ \ /' __` __`\  ]],
-      --   [[/\ \/\ \ \ \_/ |\ \ \/\ \/\ \/\ \ ]],
-      --   [[\ \_\ \_\ \___/  \ \_\ \_\ \_\ \_\]],
-      --   [[ \/_/\/_/\/__/    \/_/\/_/\/_/\/_/]],
-      -- }
+      dashboard.section.header.val = {
+        [[                __                ]],
+        [[  ___   __  __ /\_\    ___ ___    ]],
+        [[/' _ `\/\ \/\ \\/\ \ /' __` __`\  ]],
+        [[/\ \/\ \ \ \_/ |\ \ \/\ \/\ \/\ \ ]],
+        [[\ \_\ \_\ \___/  \ \_\ \_\ \_\ \_\]],
+        [[ \/_/\/_/\/__/    \/_/\/_/\/_/\/_/]],
+      }
 
       if android then
         dashboard.section.header.val = {
