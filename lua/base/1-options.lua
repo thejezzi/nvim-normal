@@ -88,7 +88,7 @@ local options = {
 }
 
 -- extra logic ----------------------------------------------------------------
-local android = vim.fn.isdirectory('/system') == 1 -- true if on android
+local android = vim.fn.isdirectory('/system') == 1 and not vim.fn.has("mac") -- true if on android and not on mac
 
 -- mouse mode
 if android then
