@@ -944,16 +944,30 @@ return {
     end,
   },
 
+  --  Leads to horrible performance issues
   --  nvim-scrollbar [scrollbar]
   --  https://github.com/petertriho/nvim-scrollbar
   {
     "petertriho/nvim-scrollbar",
     event = "User BaseFile",
+    -- enabled = false,
     opts = {
+      -- set_highlights = false,
+      -- folds = 500,
+      -- max_lines = 200,
+      autocmd = {
+        render = {
+          "BufWinEnter",
+        },
+        clear = {
+          "BufWinLeave"
+        }
+      },
       handlers = {
         gitsigns = true, -- gitsigns integration (display hunks)
         ale = true,      -- lsp integration (display errors/warnings)
         search = false,  -- hlslens integration (display search result)
+        cursor = true,
       },
       excluded_filetypes = {
         "cmp_docs",
