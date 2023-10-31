@@ -1061,6 +1061,13 @@ maps.t["<C-k>"] =
 maps.t["<C-l>"] =
 { "<cmd>wincmd l<cr>", desc = "Terminal right window navigation" }
 
+-- escape the insert mode - usefull if one wants to copy something from the
+-- terminal
+maps.t["<Esc>"] = {
+  "<C-\\><C-N>",
+  desc = "Escape the terminal mode",
+}
+
 -- dap.nvim [debugger] -----------------------------------------------------
 -- Depending your terminal some F keys may not work. To fix it:
 -- modified function keys found with `showkey -a` in the terminal to get key code
