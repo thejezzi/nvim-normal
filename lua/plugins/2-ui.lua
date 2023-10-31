@@ -149,7 +149,8 @@ return {
     config = function()
       vim.g.nightflyTerminalColors = false
       vim.g.nightflyVirtualTextColor = true
-      vim.g.nightflyWinSeparator = 1
+      vim.g.nightflyWinSeparator = 2
+      vim.g.nightflyVirtualTextColor = true
     end
   },
 
@@ -159,7 +160,6 @@ return {
     priority = 1000,
     lazy = true,
     config = function()
-      print("Hi there")
       vim.g.one_nvim_transparent_bg = true
     end
   },
@@ -192,16 +192,6 @@ return {
       local dashboard = require "alpha.themes.dashboard"
 
       -- Header
-      -- dashboard.section.header.val = {
-      --   "                                                                     ",
-      --   "       ████ ██████           █████      ██                     ",
-      --   "      ███████████             █████                             ",
-      --   "      █████████ ███████████████████ ███   ███████████   ",
-      --   "     █████████  ███    █████████████ █████ ██████████████   ",
-      --   "    █████████ ██████████ █████████ █████ █████ ████ █████   ",
-      --   "  ███████████ ███    ███ █████████ █████ █████ ████ █████  ",
-      --   " ██████  █████████████████████ ████ █████ █████ ████ ██████ ",
-      -- }
       -- dashboard.section.header.val = {
       --   '                                        ▟▙            ',
       --   '                                        ▝▘            ',
@@ -259,14 +249,6 @@ return {
           [[  \/__/    \/_/\/_/\/_/\/_/]],
         }
         --       else dashboard.section.header.val = {
-        -- [[888b      88                                                           88]],
-        -- [[8888b     88                                                           88]],
-        -- [[88 `8b    88                                                           88]],
-        -- [[88  `8b   88   ,adPPYba,   8b,dPPYba,  88,dPYba,,adPYba,   ,adPPYYba,  88]],
-        -- [[88   `8b  88  a8"     "8a  88P'   "Y8  88P'   "88"    "8a  ""     `Y8  88]],
-        -- [[88    `8b 88  8b       d8  88          88      88      88  ,adPPPPP88  88]],
-        -- [[88     `8888  "8a,   ,a8"  88          88      88      88  88,    ,88  88]],
-        -- [[88      `888   `"YbbdP"'   88          88      88      88  `"8bbdP"Y8  88]],
         --                  [[                                    __                ]],
         --                  [[                      ___   __  __ /\_\    ___ ___    ]],
         --                  [[                    /' _ `\/\ \/\ \\/\ \ /' __` __`\  ]],

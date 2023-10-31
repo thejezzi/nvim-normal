@@ -7,4 +7,11 @@ vim.ool = function()
   vim.cmd [[ highlight link LspCodeLens Comment ]]
 end
 
+vim.nightfly_customization = function()
+  -- Set FoldColumn highlight group to background color
+  vim.cmd [[highlight FoldColumn guibg=NONE]]
+  -- vim.cmd [[highlight ColorColumn guibg=#171717]]
+end
+
 vim.cmd("autocmd ColorScheme one-nvim lua vim.ool()")
+vim.cmd("autocmd ColorScheme nightfly lua vim.nightfly_customization()")
