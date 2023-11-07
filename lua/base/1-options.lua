@@ -83,6 +83,7 @@ local options = {
     lsp_handlers_enabled = true,                                        -- Enable or disable default vim.lsp.handlers (hover and signatureHelp).
     notifications_enabled = true,                                       -- nvim notifications enabled/disabled.
     big_file = { size = 1024 * 100, lines = 10000 },                    -- For files bigger than this, disable 'treesitter'.
+    go_highlight_function_calls = 1,                                    -- Highlight function calls in go
   },
   t = vim.t.bufs and vim.t.bufs or { bufs = vim.api.nvim_list_bufs() }, -- initialize buffers for the current tab.
 }

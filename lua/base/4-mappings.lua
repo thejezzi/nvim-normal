@@ -1063,7 +1063,7 @@ maps.t["<C-l>"] =
 
 -- escape the insert mode - usefull if one wants to copy something from the
 -- terminal
-maps.t["<Esc>"] = {
+maps.t["<C-Esc>"] = {
   "<C-\\><C-N>",
   desc = "Escape the terminal mode",
 }
