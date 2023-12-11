@@ -265,11 +265,12 @@ return {
     opts = {
       suggestion = {
         enabled = true,
+        autotrigger = true,
         keymap = {
-          accept = "<M-f>",
-          next = "<S-M-F>",
-          prev = "<S-M-D>",
-          dismiss = "<S-M-E>",
+          accept = "<M-a>",
+          next = "<M-d>",
+          prev = "<M-s>",
+          dismiss = "<M-f>",
         }
       }
     },
