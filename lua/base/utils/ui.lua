@@ -31,6 +31,8 @@
 --      -> toggle_syntax
 --      -> toggle_url_effect
 --      -> toggle_zen_mode
+--      -> toggle_animations
+--      -> toggle_lsp_signature
 --      -> toggle_foldcolumn
 --      -> toggle_signcolumn
 --      -> set_indent
@@ -122,9 +124,9 @@ end
 -- @param bufnr? number the buffer to toggle the clients on
 function M.toggle_buffer_inlay_hints(bufnr)
   bufnr = bufnr or 0
-  vim.b[bufnr].inlay_hints_enabled = not vim.b[bufnr].inlay_hints_enabled    -- flip buffer state
-  vim.lsp.buf.inlay_hint(bufnr, vim.b[bufnr].inlay_hints_enabled)            -- apply state
-  utils.notify(string.format("Buffer inlay hints %s", bool2str(vim.b.inlay_hints_enabled)))
+  vim.b[bufnr].inlay_hints_enabled = not vim.b[bufnr].inlay_hints_enabled
+  vim.lsp.inlay_hint(bufnr, vim.b[bufnr].inlay_hints_enabled)
+  utils.notify(string.format("Inlay hints %s", bool2str(vim.b[bufnr].inlay_hints_enabled)))
 end
 
 --- Toggle LSP inlay hints (global)
@@ -221,9 +223,9 @@ end
 
 --- Toggle URL/URI syntax highlighting rules
 function M.toggle_url_effect()
-  vim.g.highlighturl_enabled = not vim.g.highlighturl_enabled
+  vim.g.url_effect_enabled = not vim.g.url_effect_enabled
   require("base.utils").set_url_effect()
-  utils.notify(string.format("URL effect %s", bool2str(vim.g.highlighturl_enabled)))
+  utils.notify(string.format("URL effect %s", bool2str(vim.g.url_effect_enabled)))
 end
 
 local last_active_foldcolumn
@@ -245,6 +247,24 @@ function M.toggle_zen_mode(bufnr)
   end
   utils.notify(string.format("zen mode %s", bool2str(vim.b[bufnr].zen_mode)))
   vim.cmd "ZenMode"
+end
+
+--- Toggle animations
+function M.toggle_animations()
+  if vim.g.minianimate_disable then
+    vim.g.minianimate_disable = false
+  else
+    vim.g.minianimate_disable = true
+  end
+
+  local state = vim.g.minianimate_disable
+  utils.notify(string.format("animations %s", bool2str(not state)))
+end
+
+--- Toggle lsp signature
+function M.toggle_lsp_signature()
+  local state = require('lsp_signature').toggle_float_win()
+  utils.notify(string.format("lsp signature %s", bool2str(state)))
 end
 
 --- Set the indent and tab related numbers

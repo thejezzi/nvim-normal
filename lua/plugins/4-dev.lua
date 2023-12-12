@@ -37,6 +37,9 @@
 --       -> neotest.nvim                   [unit testing]
 --       -> nvim-coverage                  [code coverage]
 
+--       ## LANGUAGE IMPROVEMENTS
+--       -> guttentags_plus                [auto generate C/C++ tags]
+
 --       ## NOT INSTALLED
 --       -> distant.nvim                   [ssh to edit in a remote machine]
 
@@ -598,6 +601,20 @@ return {
       -- dap.configurations.typescriptreact = dap.configurations.typescript
       -- dap.configurations.javascriptreact = dap.configurations.typescript
 
+      -- PHP
+      dap.adapters.php = {
+        type = 'executable',
+        command = vim.fn.stdpath("data") .. '/mason/bin/php-debug-adapter',
+      }
+      dap.configurations.php = {
+        {
+          type = 'php',
+          request = 'launch',
+          name = 'Listen for Xdebug',
+          port = 9000
+        }
+      }
+
       -- Shell
       dap.adapters.bashdb = {
         type = 'executable',
@@ -716,21 +733,31 @@ return {
     "nvim-neotest/neotest",
     cmd = { "Neotest" },
     dependencies = {
-      "nvim-neotest/neotest-go",
-      "nvim-neotest/neotest-python",
-      "nvim-neotest/neotest-jest",
+      "sidlatau/neotest-dart",
       "Issafalcon/neotest-dotnet",
+      "jfpedroza/neotest-elixir",
+      "nvim-neotest/neotest-go",
+      "rcasia/neotest-java",
+      "nvim-neotest/neotest-jest",
+      "olimorris/neotest-phpunit",
+      "nvim-neotest/neotest-python",
       "rouge8/neotest-rust",
+      "lawrence-laz/neotest-zig",
     },
     opts = function()
       return {
         -- your neotest config here
         adapters = {
-          require "neotest-go",
-          require "neotest-python",
-          require "neotest-jest",
+          require "neotest-dart",
           require "neotest-dotnet",
+          require "neotest-elixir",
+          require "neotest-go",
+          require "neotest-java",
+          require "neotest-jest",
+          require "neotest-phpunit",
+          require "neotest-python",
           require "neotest-rust",
+          require "neotest-zig",
         },
       }
     end,
@@ -771,8 +798,32 @@ return {
       "CoverageClear",
       "CoverageSummary",
     },
+    dependencies = { "nvim-lua/plenary.nvim" },
     config = function() require("coverage").setup() end,
-    requires = { "nvim-lua/plenary.nvim" },
+  },
+  
+  --  LANGUAGE IMPROVEMENTS ---------------------------------------------------
+  -- guttentags_plus [auto generate C/C++ tags]
+  -- https://github.com/skywind3000/gutentags_plus
+  -- This plugin is necessary for using <C-]> (go to ctag).
+  {
+    "skywind3000/gutentags_plus",
+    ft = { "c", "cpp" },
+    dependencies = { "ludovicchabant/vim-gutentags" },
+    init = function()
+      vim.g.gutentags_plus_nomap = 1
+      vim.g.gutentags_resolve_symlinks = 1
+      vim.g.gutentags_cache_dir = vim.fn.stdpath "cache" .. "/tags"
+      vim.api.nvim_create_autocmd("FileType", {
+        desc = "Auto generate C/C++ tags",
+        callback = function()
+          local is_c = vim.bo.filetype == "c" or vim.bo.filetype == "cpp"
+          if is_c then vim.g.gutentags_enabled = 1
+          else vim.g.gutentags_enabled = 0
+          end
+        end,
+      })
+    end,
   },
 
 }

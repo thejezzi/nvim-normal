@@ -141,11 +141,13 @@ M.on_attach = function(client, bufnr)
     lsp_mappings.n["<leader>li"] = { "<cmd>LspInfo<cr>", desc = "LSP information" }
   end
 
-  if is_available "null-ls.nvim" then
+  if is_available "none-ls.nvim" then
     lsp_mappings.n["<leader>lI"] = { "<cmd>NullLsInfo<cr>", desc = "Null-ls information" }
   end
 
-  if client.supports_method "textDocument/codeAction" then
+  -- TODO: Remove jdtls once it supports "textDocument/codeAction"
+  if client.supports_method "textDocument/codeAction"
+     or client.name == "jdtls" then
     lsp_mappings.n["<leader>la"] = {
       function() vim.lsp.buf.code_action() end,
       desc = "LSP code action",
@@ -167,14 +169,15 @@ M.on_attach = function(client, bufnr)
     })
     if vim.g.codelens_enabled then vim.lsp.codelens.refresh() end
     lsp_mappings.n["<leader>ll"] = {
-      function() vim.lsp.codelens.refresh() end,
-      desc = "LSP CodeLens refresh",
-    }
-    lsp_mappings.n["<leader>lL"] = {
       function() vim.lsp.codelens.run() end,
       desc = "LSP CodeLens run",
     }
   end
+
+  lsp_mappings.n["<leader>lL"] = {
+    function() vim.api.nvim_command(':LspRestart') end,
+    desc = "LSP refresh",
+  }
 
   if client.supports_method "textDocument/declaration" then
     lsp_mappings.n["gD"] = {
@@ -198,10 +201,10 @@ M.on_attach = function(client, bufnr)
     lsp_mappings.v["<leader>lf"] = lsp_mappings.n["<leader>lf"]
 
     vim.api.nvim_buf_create_user_command(
-    bufnr,
-    "Format",
-    function() vim.lsp.buf.format(M.format_opts) end,
-    { desc = "Format file with LSP" }
+      bufnr,
+      "Format",
+      function() vim.lsp.buf.format(M.format_opts) end,
+      { desc = "Format file with LSP" }
     )
     local autoformat = M.formatting.format_on_save
     local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
@@ -209,273 +212,264 @@ M.on_attach = function(client, bufnr)
       autoformat.enabled
       and (tbl_isempty(autoformat.allow_filetypes or {}) or tbl_contains(autoformat.allow_filetypes, filetype))
       and (tbl_isempty(autoformat.ignore_filetypes or {}) or not tbl_contains(autoformat.ignore_filetypes, filetype))
-      then
-        add_buffer_autocmd("lsp_auto_format", bufnr, {
-          events = "BufWritePre",
-          desc = "Autoformat on save",
-          callback = function()
-            if not M.has_capability("textDocument/formatting", { bufnr = bufnr }) then
-              del_buffer_autocmd("lsp_auto_format", bufnr)
-              return
-            end
-            local autoformat_enabled = vim.b.autoformat_enabled
-            if autoformat_enabled == nil then autoformat_enabled = vim.g.autoformat_enabled end
-            if autoformat_enabled and ((not autoformat.filter) or autoformat.filter(bufnr)) then
-              vim.lsp.buf.format(utils.extend_tbl(M.format_opts, { bufnr = bufnr }))
-            end
-          end,
-        })
-        lsp_mappings.n["<leader>uf"] = {
-          function() require("base.utils.ui").toggle_buffer_autoformat() end,
-          desc = "Autoformatting (buffer)",
-        }
-        lsp_mappings.n["<leader>uF"] = {
-          function() require("base.utils.ui").toggle_autoformat() end,
-          desc = "Autoformatting (global)",
-        }
-      end
-    end
-
-    if client.supports_method "textDocument/documentHighlight" then
-      add_buffer_autocmd("lsp_document_highlight", bufnr, {
-        {
-          events = { "CursorHold", "CursorHoldI" },
-          desc = "highlight references when cursor holds",
-          callback = function()
-            if not M.has_capability("textDocument/documentHighlight", { bufnr = bufnr }) then
-              del_buffer_autocmd("lsp_document_highlight", bufnr)
-              return
-            end
-            vim.lsp.buf.document_highlight()
-          end,
-        },
-        {
-          events = { "CursorMoved", "CursorMovedI", "BufLeave" },
-          desc = "clear references when cursor moves",
-          callback = function() vim.lsp.buf.clear_references() end,
-        },
-      })
-    end
-
-    if client.supports_method "textDocument/hover" then
-      lsp_mappings.n["<leader>lh"] = {
-        function() vim.lsp.buf.hover() end,
-        desc = "Hover help",
-      }
-      lsp_mappings.n["gh"] = {
-        function() vim.lsp.buf.hover() end,
-        desc = "Hover help",
-      }
-    end
-
-    -- Specialized version of hover for functions.
-    -- Hides the returned object, but it highlights the parameters.
-    if client.supports_method "textDocument/signatureHelp" then
-      lsp_mappings.n["<leader>lH"] = {
-        function() vim.lsp.buf.signature_help() end,
-        desc = "Signature help",
-      }
-      lsp_mappings.n["gH"] = {
-        function() vim.lsp.buf.signature_help() end,
-        desc = "Signature help",
-      }
-    end
-
-    if client.supports_method "textDocument/hover" then
-      lsp_mappings.n["<leader>lm"] = {
-        function() vim.api.nvim_feedkeys("K", "n", false) end,
-        desc = "Hover man",
-      }
-      lsp_mappings.n["gm"] = {
-        function() vim.api.nvim_feedkeys("K", "n", false) end,
-        desc = "Hover man",
-      }
-    end
-
-    if client.supports_method "textDocument/implementation" then
-      lsp_mappings.n["gI"] = {
-        function() vim.lsp.buf.implementation() end,
-        desc = "Implementation of current symbol",
-      }
-    end
-
-    if client.supports_method "textDocument/inlayHint" then
-      if vim.b.inlay_hints_enabled == nil then vim.b.inlay_hints_enabled = vim.g.inlay_hints_enabled end
-      -- TODO: remove check after dropping support for Neovim v0.9
-      if vim.lsp.inlay_hint then
-        if vim.b.inlay_hints_enabled then vim.lsp.inlay_hint(bufnr, true) end
-        lsp_mappings.n["<leader>uH"] = {
-          function() require("base.utils.ui").toggle_buffer_inlay_hints(bufnr) end,
-          desc = "LSP inlay hints (buffer)",
-        }
-      end
-    end
-
-    if client.supports_method "textDocument/references" then
-      lsp_mappings.n["<leader>lR"] = {
-        function() vim.lsp.buf.references() end,
-        desc = "Hover references",
-      }
-      lsp_mappings.n["gr"] = {
-        function() vim.lsp.buf.references() end,
-        desc = "References of current symbol",
-      }
-    end
-
-    if client.supports_method "textDocument/rename" then
-      lsp_mappings.n["<leader>lr"] = {
-        function() vim.lsp.buf.rename() end,
-        desc = "Rename current symbol",
-      }
-    end
-
-    if client.supports_method "textDocument/typeDefinition" then
-      lsp_mappings.n["gT"] = {
-        function() vim.lsp.buf.type_definition() end,
-        desc = "Definition of current type",
-      }
-    end
-
-    if client.supports_method "workspace/symbol" then
-      lsp_mappings.n["<leader>lS"] = { function() vim.lsp.buf.workspace_symbol() end, desc = "Search symbol in workspace" }
-      lsp_mappings.n["gS"] = { function() vim.lsp.buf.workspace_symbol() end, desc = "Search symbol in workspace" }
-    end
-
-    if client.supports_method "textDocument/semanticTokens/full" and vim.lsp.semantic_tokens then
-      if vim.g.semantic_tokens_enabled then
-        vim.b[bufnr].semantic_tokens_enabled = true
-        lsp_mappings.n["<leader>uY"] = {
-          function() require("base.utils.ui").toggle_buffer_semantic_tokens(bufnr) end,
-          desc = "LSP semantic highlight (buffer)",
-        }
-      else
-        client.server_capabilities.semanticTokensProvider = nil
-      end
-    end
-
-
-
-    if is_available "telescope.nvim" then -- setup telescope mappings if available
-      if lsp_mappings.n.gd then lsp_mappings.n.gd[1] = function() require("telescope.builtin").lsp_definitions() end end
-      if lsp_mappings.n.gI then
-        lsp_mappings.n.gI[1] = function() require("telescope.builtin").lsp_implementations() end
-      end
-      if lsp_mappings.n.gr then lsp_mappings.n.gr[1] = function() require("telescope.builtin").lsp_references() end end
-      if lsp_mappings.n["<leader>lR"] then
-        lsp_mappings.n["<leader>lR"][1] = function() require("telescope.builtin").lsp_references() end
-      end
-      if lsp_mappings.n.gy then
-        lsp_mappings.n.gy[1] = function() require("telescope.builtin").lsp_type_definitions() end
-      end
-      if lsp_mappings.n["<leader>lS"] then
-        lsp_mappings.n["<leader>lS"][1] = function()
-          vim.ui.input({ prompt = "Symbol Query: (leave empty for word under cursor)" }, function(query)
-            if query then
-              -- word under cursor if given query is empty
-              if query == "" then query = vim.fn.expand "<cword>" end
-              require("telescope.builtin").lsp_workspace_symbols {
-                query = query,
-                prompt_title = ("Find word (%s)"):format(query),
-              }
-            end
-          end)
-        end
-      end
-      if lsp_mappings.n["gS"] then
-        lsp_mappings.n["gS"][1] = function()
-          vim.ui.input({ prompt = "Symbol Query: (leave empty for word under cursor)" }, function(query)
-            if query then
-              -- word under cursor if given query is empty
-              if query == "" then query = vim.fn.expand "<cword>" end
-              require("telescope.builtin").lsp_workspace_symbols {
-                query = query,
-                prompt_title = ("Find word (%s)"):format(query),
-              }
-            end
-          end)
-        end
-      end
-    end
-
-    if not vim.tbl_isempty(lsp_mappings.v) then
-      lsp_mappings.v["<leader>l"] = { desc = utils.get_icon("ActiveLSP", 1, true) .. "LSP" }
-    end
-    utils.set_mappings(lsp_mappings, { buffer = bufnr })
-
-    for id, _ in pairs(base.lsp.progress) do -- clear lingering progress messages
-      if not next(vim.lsp.get_active_clients { id = tonumber(id:match "^%d+") }) then base.lsp.progress[id] = nil end
-    end
-
-    local on_attach_override = nil -- todo: clean this
-    conditional_func(on_attach_override, true, client, bufnr)
-  end
-
-  --- The default LSP capabilities
-  M.capabilities = vim.lsp.protocol.make_client_capabilities()
-  M.capabilities.textDocument.completion.completionItem.documentationFormat = { "markdown", "plaintext" }
-  M.capabilities.textDocument.completion.completionItem.snippetSupport = true
-  M.capabilities.textDocument.completion.completionItem.preselectSupport = true
-  M.capabilities.textDocument.completion.completionItem.insertReplaceSupport = true
-  M.capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
-  M.capabilities.textDocument.completion.completionItem.deprecatedSupport = true
-  M.capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
-  M.capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
-  M.capabilities.textDocument.completion.completionItem.resolveSupport =
-  { properties = { "documentation", "detail", "additionalTextEdits" } }
-  M.capabilities.textDocument.foldingRange = { dynamicRegistration = false, lineFoldingOnly = true }
-  M.flags = {}
-
-  --- Get the server configuration for a given language server to be provided to the server's `setup()` call
-  ---@param server_name string The name of the server
-  ---@return table # The table of LSP options used when setting up the given language server
-  function M.config(server_name)
-    local server = require("lspconfig")[server_name]
-    local lsp_opts = utils.extend_tbl(server, { capabilities = M.capabilities, flags = M.flags })
-    if server_name == "jsonls" then -- by default add json schemas
-      local schemastore_avail, schemastore = pcall(require, "schemastore")
-      if schemastore_avail then
-        lsp_opts.settings = { json = { schemas = schemastore.json.schemas(), validate = { enable = true } } }
-      end
-    end
-    if server_name == "yamlls" then -- by default add yaml schemas
-      local schemastore_avail, schemastore = pcall(require, "schemastore")
-      if schemastore_avail then lsp_opts.settings = { yaml = { schemas = schemastore.yaml.schemas() } } end
-    end
-    if server_name == "lua_ls" then -- by default initialize neodev and disable third party checking
-      pcall(require, "neodev")
-      lsp_opts.before_init = function(param, config)
-        if vim.b.neodev_enabled then
-          for _, base_config in ipairs(base.supported_configs) do
-            if param.rootPath:match(base_config) then
-              table.insert(config.settings.Lua.workspace.library, base.install.home .. "/lua")
-              break
-            end
+    then
+      add_buffer_autocmd("lsp_auto_format", bufnr, {
+        events = "BufWritePre",
+        desc = "Autoformat on save",
+        callback = function()
+          if not M.has_capability("textDocument/formatting", { bufnr = bufnr }) then
+            del_buffer_autocmd("lsp_auto_format", bufnr)
+            return
           end
-        end
-      end
-      lsp_opts.settings = { Lua = { workspace = { checkThirdParty = false } } }
-    end
-
-    if server_name == "rust_analyzer" then
-      lsp_opts.settings = {
-        ["rust-analyzer"] = {
-          cargo = {
-            allFeatures = true,
-          },
-          checkOnSave = {
-            command = "clippy",
-          },
-        },
+          local autoformat_enabled = vim.b.autoformat_enabled
+          if autoformat_enabled == nil then autoformat_enabled = vim.g.autoformat_enabled end
+          if autoformat_enabled and ((not autoformat.filter) or autoformat.filter(bufnr)) then
+            vim.lsp.buf.format(utils.extend_tbl(M.format_opts, { bufnr = bufnr }))
+          end
+        end,
+      })
+      lsp_mappings.n["<leader>uf"] = {
+        function() require("base.utils.ui").toggle_buffer_autoformat() end,
+        desc = "Autoformatting (buffer)",
+      }
+      lsp_mappings.n["<leader>uF"] = {
+        function() require("base.utils.ui").toggle_autoformat() end,
+        desc = "Autoformatting (global)",
       }
     end
-
-    local opts = lsp_opts
-    local old_on_attach = server.on_attach
-    opts.on_attach = function(client, bufnr)
-      conditional_func(old_on_attach, true, client, bufnr)
-      M.on_attach(client, bufnr)
-    end
-    return opts
   end
 
-  return M
+  if client.supports_method "textDocument/documentHighlight" then
+    add_buffer_autocmd("lsp_document_highlight", bufnr, {
+      {
+        events = { "CursorHold", "CursorHoldI" },
+        desc = "highlight references when cursor holds",
+        callback = function()
+          if not M.has_capability("textDocument/documentHighlight", { bufnr = bufnr }) then
+            del_buffer_autocmd("lsp_document_highlight", bufnr)
+            return
+          end
+          vim.lsp.buf.document_highlight()
+        end,
+      },
+      {
+        events = { "CursorMoved", "CursorMovedI", "BufLeave" },
+        desc = "clear references when cursor moves",
+        callback = function() vim.lsp.buf.clear_references() end,
+      },
+    })
+  end
+
+  if client.supports_method "textDocument/hover" then
+    lsp_mappings.n["<leader>lh"] = {
+      function() vim.lsp.buf.hover() end,
+      desc = "Hover help",
+    }
+    lsp_mappings.n["gh"] = {
+      function() vim.lsp.buf.hover() end,
+      desc = "Hover help",
+    }
+  end
+
+  -- Specialized version of hover for functions.
+  -- Hides the returned object, but it highlights the parameters.
+  if client.supports_method "textDocument/signatureHelp" then
+    lsp_mappings.n["<leader>lH"] = {
+      function() vim.lsp.buf.signature_help() end,
+      desc = "Signature help",
+    }
+    lsp_mappings.n["gH"] = {
+      function() vim.lsp.buf.signature_help() end,
+      desc = "Signature help",
+    }
+  end
+
+  if client.supports_method "textDocument/hover" then
+    lsp_mappings.n["<leader>lm"] = {
+      function() vim.api.nvim_feedkeys("K", "n", false) end,
+      desc = "Hover man",
+    }
+    lsp_mappings.n["gm"] = {
+      function() vim.api.nvim_feedkeys("K", "n", false) end,
+      desc = "Hover man",
+    }
+  end
+
+  if client.supports_method "textDocument/implementation" then
+    lsp_mappings.n["gI"] = {
+      function() vim.lsp.buf.implementation() end,
+      desc = "Implementation of current symbol",
+    }
+  end
+
+  if client.supports_method "textDocument/inlayHint" then
+    if vim.b.inlay_hints_enabled == nil then vim.b.inlay_hints_enabled = vim.g.inlay_hints_enabled end
+    -- TODO: remove check after dropping support for Neovim v0.9
+    if vim.lsp.inlay_hint then
+      if vim.b.inlay_hints_enabled then vim.lsp.inlay_hint(bufnr, true) end
+      lsp_mappings.n["<leader>uH"] = {
+        function() require("base.utils.ui").toggle_buffer_inlay_hints(bufnr) end,
+        desc = "LSP inlay hints (buffer)",
+      }
+    end
+  end
+
+  if client.supports_method "textDocument/references" then
+    lsp_mappings.n["<leader>lR"] = {
+      function() vim.lsp.buf.references() end,
+      desc = "Hover references",
+    }
+    lsp_mappings.n["gr"] = {
+      function() vim.lsp.buf.references() end,
+      desc = "References of current symbol",
+    }
+  end
+
+  if client.supports_method "textDocument/rename" then
+    lsp_mappings.n["<leader>lr"] = {
+      function() vim.lsp.buf.rename() end,
+      desc = "Rename current symbol",
+    }
+  end
+
+  if client.supports_method "textDocument/typeDefinition" then
+    lsp_mappings.n["gT"] = {
+      function() vim.lsp.buf.type_definition() end,
+      desc = "Definition of current type",
+    }
+  end
+
+  if client.supports_method "workspace/symbol" then
+    lsp_mappings.n["<leader>lS"] = { function() vim.lsp.buf.workspace_symbol() end, desc = "Search symbol in workspace" }
+    lsp_mappings.n["gS"] = { function() vim.lsp.buf.workspace_symbol() end, desc = "Search symbol in workspace" }
+  end
+
+  if client.supports_method "textDocument/semanticTokens/full" and vim.lsp.semantic_tokens then
+    if vim.g.semantic_tokens_enabled then
+      vim.b[bufnr].semantic_tokens_enabled = true
+      lsp_mappings.n["<leader>uY"] = {
+        function() require("base.utils.ui").toggle_buffer_semantic_tokens(bufnr) end,
+        desc = "LSP semantic highlight (buffer)",
+      }
+    else
+      client.server_capabilities.semanticTokensProvider = nil
+    end
+  end
+
+  if is_available "telescope.nvim" then -- setup telescope mappings if available
+    if lsp_mappings.n.gd then lsp_mappings.n.gd[1] = function() require("telescope.builtin").lsp_definitions() end end
+    if lsp_mappings.n.gI then
+      lsp_mappings.n.gI[1] = function() require("telescope.builtin").lsp_implementations() end
+    end
+    if lsp_mappings.n.gr then lsp_mappings.n.gr[1] = function() require("telescope.builtin").lsp_references() end end
+    if lsp_mappings.n["<leader>lR"] then
+      lsp_mappings.n["<leader>lR"][1] = function() require("telescope.builtin").lsp_references() end
+    end
+    if lsp_mappings.n.gy then
+      lsp_mappings.n.gy[1] = function() require("telescope.builtin").lsp_type_definitions() end
+    end
+    if lsp_mappings.n["<leader>lS"] then
+      lsp_mappings.n["<leader>lS"][1] = function()
+        vim.ui.input({ prompt = "Symbol Query: (leave empty for word under cursor)" }, function(query)
+          if query then
+            -- word under cursor if given query is empty
+            if query == "" then query = vim.fn.expand "<cword>" end
+            require("telescope.builtin").lsp_workspace_symbols {
+              query = query,
+              prompt_title = ("Find word (%s)"):format(query),
+            }
+          end
+        end)
+      end
+    end
+    if lsp_mappings.n["gS"] then
+      lsp_mappings.n["gS"][1] = function()
+        vim.ui.input({ prompt = "Symbol Query: (leave empty for word under cursor)" }, function(query)
+          if query then
+            -- word under cursor if given query is empty
+            if query == "" then query = vim.fn.expand "<cword>" end
+            require("telescope.builtin").lsp_workspace_symbols {
+              query = query,
+              prompt_title = ("Find word (%s)"):format(query),
+            }
+          end
+        end)
+      end
+    end
+  end
+
+  if not vim.tbl_isempty(lsp_mappings.v) then
+    lsp_mappings.v["<leader>l"] = { desc = utils.get_icon("ActiveLSP", 1, true) .. "LSP" }
+  end
+  utils.set_mappings(lsp_mappings, { buffer = bufnr })
+
+  for id, _ in pairs(base.lsp.progress) do -- clear lingering progress messages
+    if not next(vim.lsp.get_active_clients { id = tonumber(id:match "^%d+") }) then base.lsp.progress[id] = nil end
+  end
+
+  local on_attach_override = nil -- todo: clean this
+  conditional_func(on_attach_override, true, client, bufnr)
+end
+
+--- The default LSP capabilities
+M.capabilities = vim.lsp.protocol.make_client_capabilities()
+M.capabilities.textDocument.completion.completionItem.documentationFormat = { "markdown", "plaintext" }
+M.capabilities.textDocument.completion.completionItem.snippetSupport = true
+M.capabilities.textDocument.completion.completionItem.preselectSupport = true
+M.capabilities.textDocument.completion.completionItem.insertReplaceSupport = true
+M.capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
+M.capabilities.textDocument.completion.completionItem.deprecatedSupport = true
+M.capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
+M.capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
+M.capabilities.textDocument.completion.completionItem.resolveSupport =
+  { properties = { "documentation", "detail", "additionalTextEdits" } }
+M.capabilities.textDocument.foldingRange = { dynamicRegistration = false, lineFoldingOnly = true }
+M.flags = {}
+
+--- Get the server configuration for a given language server to be provided to the server's `setup()` call
+---@param server_name string The name of the server
+---@return table # The table of LSP options used when setting up the given language server
+function M.config(server_name)
+  local server = require("lspconfig")[server_name]
+  local lsp_opts = utils.extend_tbl(server, { capabilities = M.capabilities, flags = M.flags })
+
+  if server_name == "rust_analyzer" then
+    lsp_opts.settings = {
+      ["rust-analyzer"] = {
+        cargo = {
+          allFeatures = true,
+        },
+        checkOnSave = {
+          command = "clippy",
+        },
+      },
+    }
+  end
+
+  if server_name == "jsonls" then -- by default add json schemas
+    local schemastore_avail, schemastore = pcall(require, "schemastore")
+    if schemastore_avail then
+      lsp_opts.settings = { json = { schemas = schemastore.json.schemas(), validate = { enable = true } } }
+    end
+  end
+  if server_name == "yamlls" then -- by default add yaml schemas
+    local schemastore_avail, schemastore = pcall(require, "schemastore")
+    if schemastore_avail then lsp_opts.settings = { yaml = { schemas = schemastore.yaml.schemas() } } end
+  end
+  if server_name == "lua_ls" then -- by default initialize neodev and disable third party checking
+    pcall(require, "neodev")
+    lsp_opts.settings = { Lua = { workspace = { checkThirdParty = false } } }
+  end
+  if server_name == "bashls" then -- by default use mason shellcheck path
+    lsp_opts.settings = { bashIde = { shellcheckPath = vim.fn.stdpath "data" .. "/mason/bin/shellcheck" } }
+  end
+  local opts = lsp_opts
+  local old_on_attach = server.on_attach
+  opts.on_attach = function(client, bufnr)
+    conditional_func(old_on_attach, true, client, bufnr)
+    M.on_attach(client, bufnr)
+  end
+  return opts
+end
+
+return M

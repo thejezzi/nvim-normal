@@ -10,10 +10,10 @@
 
 --       ## LSP
 --       -> nvim-lspconfig                 [lsp config]
---       -> lsp-timeout                    [lsp garbage collector]
+--       -> garbage-day                    [lsp garbage collector]
 --       -> mason.nvim                     [lsp package manager]
 --       -> SchemaStore.nvim               [lsp schema manager]
---       -> null-ls                        [lsp code formatting]
+--       -> none-ls                        [lsp code formatting]
 --       -> neodev                         [lsp for nvim lua api]
 
 --       ## AUTO COMPLETON
@@ -201,7 +201,7 @@ return {
         orig_handler(_, msg, info)
       end
 
-      if vim.g.lsp_handlers_enabled then
+      if vim.g.lsp_round_borders_enabled then
         vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded", silent = true })
         vim.lsp.handlers["textDocument/signatureHelp"] =
           vim.lsp.with(vim.lsp.handlers.signature_help, { border = "rounded", silent = true })
@@ -223,21 +223,23 @@ return {
     end,
   },
 
-  --  lsp-timeout [lsp garbage collector]
-  --  https://github.com/hinell/lsp-timeout.nvim
-  --  Stop inactive lsp servers until the buffer recover the focus.
-  -- {
-  --   "hinell/lsp-timeout.nvim",
-  --   dependencies={ "neovim/nvim-lspconfig" },
-  --   event = "User BaseFile",
-  --   init = function()
-  --     vim.g["lsp-timeout-config"] = {
-  --       stopTimeout = 1000*60*10, -- Stop unused lsp servers after 10 min.
-  --       startTimeout = 2000, -- Force server restart if nvim can't in 2s.
-  --       silent = true -- Notifications disabled
-  --     }
-  --   end
-  -- },
+  --  garbage-day.nvim [lsp garbage collector]
+  --  https://github.com/zeioth/garbage-day.nvim
+  {
+    "zeioth/garbage-day.nvim",
+    event = "User BaseFile",
+    opts = {
+      aggressive_mode = false,
+      excluded_lsp_clients = {
+        "null-ls", "jdtls"
+      },
+      grace_period = (60*5),
+      wakeup_delay = 3000,
+      notifications = false,
+      retries = 3,
+      timeout = 1000,
+    }
+  },
 
   --  mason [lsp package manager]
   --  https://github.com/williamboman/mason.nvim
@@ -318,6 +320,10 @@ return {
             command = "beautysh",
             args = { "--indent-size=2", "$FILENAME" },
           },
+          -- TODO: Disable the next feature once this has been merged.
+          -- https://github.com/bash-lsp/bash-language-server/issues/933
+          nls.builtins.code_actions.shellcheck,
+          nls.builtins.diagnostics.shellcheck.with { diagnostics_format = "" },
         },
         on_attach = require("base.utils.lsp").on_attach,
       }

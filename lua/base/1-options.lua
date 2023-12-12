@@ -71,19 +71,24 @@ local options = {
   g = {
     mapleader = " ",                                                    -- Set leader key.
     maplocalleader = ",",                                               -- Set default local leader key.
+    big_file = { size = 1024 * 100, lines = 10000 },                    -- For files bigger than this, disable 'treesitter'.
+
+    -- All these options are toggleable with <space + l + u>
     autoformat_enabled = true,                                          -- Enable or disable auto formatting at start (lsp.formatting.format_on_save must be enabled).
     autopairs_enabled = true,                                           -- Enable autopairs at start.
-    inlay_hints_enabled = true,                                         -- Enable LSP inlay_hints at startup.
-    semantic_tokens_enabled = true,                                     -- Enable LSP semantic tokens on startup.
     cmp_enabled = true,                                                 -- Enable completion at start.
     codelens_enabled = true,                                            -- Enable or disable automatic codelens refreshing for lsp that support it.
     diagnostics_mode = 3,                                               -- Set the visibility of diagnostics in the UI (0=off, 1=only show in status line, 2=virtual text off, 3=all on).
+    go_highlight_function_calls = 1,                                    -- Highlight function calls in go
     highlighturl_enabled = true,                                        -- Highlight URLs by default.
     icons_enabled = true,                                               -- Disable icons in the UI (disable if no nerd font is available).
+    inlay_hints_enabled = true,                                         -- Enable LSP inlay_hints at startup.
     lsp_handlers_enabled = true,                                        -- Enable or disable default vim.lsp.handlers (hover and signatureHelp).
+    lsp_round_borders_enabled = true,                                   -- Enable round borders for lsp hover and signatureHelp.
+    lsp_signature_enabled = true,                                       -- Enable automatically showing lsp help as you write function parameters.
     notifications_enabled = true,                                       -- nvim notifications enabled/disabled.
-    big_file = { size = 1024 * 100, lines = 10000 },                    -- For files bigger than this, disable 'treesitter'.
-    go_highlight_function_calls = 1,                                    -- Highlight function calls in go
+    semantic_tokens_enabled = true,                                     -- Enable LSP semantic tokens on startup.
+    url_effect_enabled = true,                                          -- Highlight URLs with an underline effect.
   },
   t = vim.t.bufs and vim.t.bufs or { bufs = vim.api.nvim_list_bufs() }, -- initialize buffers for the current tab.
 }
