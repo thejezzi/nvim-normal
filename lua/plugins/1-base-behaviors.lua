@@ -37,6 +37,7 @@ return {
   --   This way you can install and use 'ranger' and its dependency 'pynvim'.
   {
     "kevinhwang91/rnvimr",
+    event = "VeryLazy",
     cmd = { "RnvimrToggle" },
     enabled = not windows,
     config = function(_, opts)
@@ -202,13 +203,14 @@ return {
       session_manager.setup(opts)
 
       -- Auto save session
+      -- BUG: This feature will auto-close anything nofile before saving.
+      --      This include neotree, aerial, mergetool, among others.
+      --      Consider commenting the next block if this is important for you.
+      --
+      --      This won't be necessary once neovim fixes:
+      --      https://github.com/neovim/neovim/issues/12242
       vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
         callback = function ()
-          -- BUG: Before saving your session we close anything non-buffer:
-          --      neotree, mergetool, aerial...
-          --
-          --      This is currently necessary due to this neovim bug.
-          --      https://github.com/neovim/neovim/issues/12242
           session_manager.save_current_session()
         end
       })
@@ -633,4 +635,32 @@ return {
       end
     end
   },
+
+  -- lsp_signature.nvim [auto params help]
+  -- https://github.com/ray-x/lsp_signature.nvim
+  {
+    "ray-x/lsp_signature.nvim",
+    event = "User BaseFile",
+    opts = function()
+      -- Apply globals from 1-options.lua
+      local is_enabled = vim.g.lsp_signature_enabled
+      local round_borders = {}
+      if vim.g.lsp_round_borders_enabled then
+        round_borders = { border = 'rounded' }
+      end
+      return {
+        -- Window mode
+        floating_window = is_enabled, -- Dislay it as floating window.
+        hi_parameter = "IncSearch",   -- Color to highlight floating window.
+        handler_opts = round_borders, -- Window style
+
+        -- Hint mode
+        hint_enable = false,          -- Display it as hint.
+        hint_prefix = "👈 "
+
+        -- Aditionally, you can use <space>ui to toggle inlay hints.
+      } end,
+    config = function(_, opts) require'lsp_signature'.setup(opts) end
+  },
+  
 }

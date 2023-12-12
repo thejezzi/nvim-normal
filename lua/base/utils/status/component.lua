@@ -17,6 +17,27 @@
 --
 -- NOTE: Because components use the builder design pattern, we don't need to
 --       manually require the providers from 'providers.lua'.
+--
+--    Components:
+--      -> fill
+--      -> file_info
+--      -> file_encoding
+--      -> tabline_file_info
+--      -> nav
+--      -> cmd_info
+--      -> mode
+--      -> breadcrumbs
+--      -> separated_path
+--      -> git_branch
+--      -> git_diff
+--      -> diagnostics
+--      -> treesitter
+--      -> lsp
+--      -> virtualenv
+--      -> foldcolumn
+--      -> signcolumn
+--      -> compiler_state
+--      -> builder
 
 local M = {}
 
@@ -449,6 +470,23 @@ function M.lsp(opts)
   )
 end
 
+--- A function to build a set of children components for a git branch section
+---@param opts? table options for configuring git branch and the overall padding
+---@return table # The Heirline component table
+-- @usage local heirline_component = require("astroui.status").component.git_branch()
+function M.virtual_env(opts)
+  opts = extend_tbl({
+    virtual_env = { icon = { kind = "Environment", padding = { right = 1 } } },
+    surround = {
+      separator = "right",
+      color = "virtual_env_bg",
+      condition = condition.has_virtual_env,
+    },
+    hl = hl.get_attributes "virtual_env",
+  }, opts)
+  return M.builder(status_utils.setup_providers(opts, { "virtual_env" }))
+end
+
 --- A function to build a set of components for a foldcolumn section in a statuscolumn.
 ---@param opts? table options for configuring foldcolumn and the overall padding.
 ---@return table # The Heirline component table.
@@ -464,7 +502,7 @@ function M.foldcolumn(opts)
         local fillchars = vim.opt_local.fillchars:get()
         if char == (fillchars.foldopen or get_icon "FoldOpened") then
           vim.cmd "norm! zc"
-        elseif char == (fillchars.foldcolse or get_icon "FoldClosed") then
+        elseif char == (fillchars.foldclose or get_icon "FoldClosed") then
           vim.cmd "norm! zo"
         end
       end,
@@ -520,6 +558,34 @@ function M.signcolumn(opts)
   return M.builder(status_utils.setup_providers(opts, { "signcolumn" }))
 end
 
+--- Display an spinner while the compiler is compiling.
+---@param opts? table options for configuring compiler_state and the overall padding.
+---@return table # The Heirline component table.
+-- @usage local heirline_component = require("base.utils.status").component.compiler_state()
+function M.compiler_state(opts)
+  opts = extend_tbl({
+    compiler_state = {
+      condition = function()
+        return is_available "compiler.nvim"
+      end,
+      padding = { left = 1, right = 0 },
+    },
+    hl = hl.get_attributes "treesitter",
+    on_click = {
+      name = "compiler_open",
+      callback = function()
+        if is_available "compiler.nvim" then
+          vim.defer_fn(function() vim.cmd("CompilerToggleResults") end, 100)
+        end
+      end,
+    },
+  }, opts)
+  return M.builder(status_utils.setup_providers(opts, {
+    "compiler_state",
+  }))
+end
+
+
 --- A general function to build a section of base status providers with highlights,
 --- conditions, and section surrounding.
 ---@param opts? table a list of components to build into a section.
@@ -563,33 +629,6 @@ function M.builder(opts)
         opts.surround.condition
       )
       or children
-end
-
---- Display an spinner while the compiler is compiling.
----@param opts? table options for configuring compiler_state and the overall padding.
----@return table # The Heirline component table.
--- @usage local heirline_component = require("base.utils.status").component.compiler_state()
-function M.compiler_state(opts)
-  opts = extend_tbl({
-    compiler_state = {
-      condition = function()
-        return is_available "compiler.nvim"
-      end,
-      padding = { left = 1, right = 0 },
-    },
-    hl = hl.get_attributes "treesitter",
-    on_click = {
-      name = "compiler_open",
-      callback = function()
-        if is_available "compiler.nvim" then
-          vim.defer_fn(function() vim.cmd("CompilerToggleResults") end, 100)
-        end
-      end,
-    },
-  }, opts)
-  return M.builder(status_utils.setup_providers(opts, {
-    "compiler_state",
-  }))
 end
 
 return M
