@@ -40,6 +40,9 @@
 --       ## LANGUAGE IMPROVEMENTS
 --       -> guttentags_plus                [auto generate C/C++ tags]
 
+--       ## MISC
+--       -> trouble.nvim                   [pretty print hints and errors]
+
 --       ## NOT INSTALLED
 --       -> distant.nvim                   [ssh to edit in a remote machine]
 
@@ -270,15 +273,25 @@ return {
         enabled = true,
         autotrigger = true,
         keymap = {
-          accept = "<M-a>",
-          next = "<M-d>",
-          prev = "<M-s>",
-          dismiss = "<M-f>",
+          accept = "<C-w>",
+          next = "<C-q>",
+          prev = "<C-a>",
+          dismiss = "<C-x>",
         }
-      }
+      },
+      panel = {
+        enabled = false,
+      },
     },
     config = function(_, opts)
       require("copilot").setup(opts)
+    end
+  },
+
+  {
+    "zbirenbaum/copilot-cmp",
+    config = function ()
+      require("copilot_cmp").setup()
     end
   },
 
@@ -801,7 +814,7 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function() require("coverage").setup() end,
   },
-  
+
   --  LANGUAGE IMPROVEMENTS ---------------------------------------------------
   -- guttentags_plus [auto generate C/C++ tags]
   -- https://github.com/skywind3000/gutentags_plus
@@ -825,5 +838,34 @@ return {
       })
     end,
   },
+
+  -- crates.nvim [handle crates in Cargo.toml files]
+  -- https://github.com/Saecki/crates.nvim
+  -- Verifies versions of crates in the Cargo toml file and gives the ability
+  -- to add features on the fly by also showing a list of available ones.
+  -- Loads lazily when opening a Cargo toml file :)
+  {
+    'saecki/crates.nvim',
+    event = { "BufRead Cargo.toml" },
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      require('crates').setup()
+    end,
+  },
+
+  -- MISC ---------------------------------------------------------------------
+  -- -- trouble.nvim [pretty print hints and errors]
+  -- -- https://github.com/folke/trouble.nvim
+  -- -- Trouble is a pretty-printer for Neovim's LSP diagnostics.
+  -- {
+  --   "folke/trouble.nvim",
+  --   dependencies = { "nvim-tree/nvim-web-devicons" },
+  --   cmd = { "Trouble", "TroubleToggle", "TroubleClose" },
+  --   opts = {
+  --     -- your configuration comes here
+  --     -- or leave it empty to use the default settings
+  --     -- refer to the configuration section below
+  --   },
+  -- },
 
 }

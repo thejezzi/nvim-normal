@@ -107,13 +107,13 @@ maps.n["<leader>q"] = {
   function() require("base.utils").confirm_quit() end,
   desc = "Quit",
 }
-maps.n["<Tab>"] = {
-  "<Tab>",
-  noremap = true,
-  silent = true,
-  expr = false,
-  desc = "FIX: Prevent TAB from behaving like <C-i>, as they share the same internal code",
-}
+-- maps.n["<Tab>"] = {
+--   "<Tab>",
+--   noremap = true,
+--   silent = true,
+--   expr = false,
+--   desc = "FIX: Prevent TAB from behaving like <C-i>, as they share the same internal code",
+-- }
 
 -- clipboard ---------------------------------------------------------------
 
@@ -123,7 +123,7 @@ if not android then
   -- only useful when the option clipboard is commented on ./1-options.lua
   maps.n["<C-y>"] = { '"+y<esc>', desc = "Copy to cliboard" }
   maps.x["<C-y>"] = { '"+y<esc>', desc = "Copy to cliboard" }
-  maps.n["<C-d>"] = { '"+y<esc>dd', desc = "Copy to clipboard and delete line" }
+  -- maps.n["<C-d>"] = { '"+y<esc>dd', desc = "Copy to clipboard and delete line" }
   maps.x["<C-d>"] = { '"+y<esc>dd', desc = "Copy to clipboard and delete line" }
   maps.n["<C-p>"] = { '"+p<esc>', desc = "Paste from cliboard" }
 end

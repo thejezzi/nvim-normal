@@ -15,3 +15,9 @@ end
 
 vim.cmd("autocmd ColorScheme one-nvim lua vim.ool()")
 vim.cmd("autocmd ColorScheme nightfly lua vim.nightfly_customization()")
+
+vim.filetype.add({
+    extension = {
+        templ = "templ",
+    },
+})

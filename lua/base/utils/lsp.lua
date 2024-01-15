@@ -436,11 +436,29 @@ function M.config(server_name)
   if server_name == "rust_analyzer" then
     lsp_opts.settings = {
       ["rust-analyzer"] = {
+        rootMarkers = { "Cargo.toml", "rust-project.json", ".git/" },
+        -- assist = {
+        --   importGranularity = "module",
+        --   importPrefix = "by_self",
+        -- },
         cargo = {
-          allFeatures = true,
+          -- allFeatures = true,
+          loadOutDirsFromCheck = true,
+          features = { "ssr" },
         },
+        -- -- Add clippy lints for Rust.
         checkOnSave = {
+          allFeatures = true,
           command = "clippy",
+          extraArgs = { "--no-deps" },
+        },
+        procMacro = {
+          ignored = {
+            leptos_macro = {
+              "component",
+              "server",
+            },
+          },
         },
       },
     }
