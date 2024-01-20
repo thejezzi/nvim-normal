@@ -574,6 +574,9 @@ end
 function M.lsp_progress(opts)
   local spinner = utils.get_spinner("LSPLoading", 1) or { "" }
   return function()
+    -- check if base.lsp is nil and if so return
+    if not base.lsp then return end
+
     local _, Lsp = next(base.lsp.progress)
     return status_utils.stylize(
       Lsp
@@ -709,16 +712,18 @@ function M.compiler_state(opts)
     tasks = ovs.list_tasks({ unique = false })
     tasks_by_status = ovs.util.tbl_group_by(tasks, "status")
 
-    if tasks_by_status["RUNNING"] then state = "RUNNING"
-    else state = "INACTIVE" end
+    if tasks_by_status["RUNNING"] then
+      state = "RUNNING"
+    else
+      state = "INACTIVE"
+    end
 
     return status_utils.stylize(state == "RUNNING" and (table.concat({
-          " ",
-          spinner[math.floor(luv.hrtime() / 12e7) % #spinner + 1] or "",
-          "compiling" or "",
-        }, "")
-      ), opts)
-
+      " ",
+      spinner[math.floor(luv.hrtime() / 12e7) % #spinner + 1] or "",
+      "compiling" or "",
+    }, "")
+    ), opts)
   end
 end
 
